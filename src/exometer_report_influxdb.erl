@@ -264,6 +264,7 @@ maybe_send(MetricName, Tags, Fields,
                   precision = Precision,
                   timestamping = Timestamping} = State) ->
     Packet = make_packet(MetricName, Tags, Fields, Timestamping andalso unix_time(Precision), Precision),
+    io:format("maybe_send: Metric: ~p, has tags: ~p, with fields: ~p return packet ~p", [MetricName, Tags, Fields, Packet]),
     send(Packet, State);
 maybe_send(MetricName, Tags, Fields,
            #state{protocol = Protocol,
@@ -276,6 +277,8 @@ maybe_send(MetricName, Tags, Fields,
     Packet = make_packet(MetricName, Tags, Fields, Timestamping andalso unix_time(Precision), Precision),
     BinaryPacket = list_to_binary(Packet),
     NewCollectedMetrics = <<CollectedMetrics/binary, BinaryPacket/binary, "\n">>,
+    io:format("maybe_send: Metric: ~p, has tags: ~p, with fields: ~p return packet ~p", [MetricName, Tags, Fields, Packet]),
+    io:format("collected_metrics: ~p, new_cm: ~p", [CollectedMetrics, NewCollectedMetrics]),
     if
         Protocol == udp andalso size(CollectedMetrics) > 0 andalso size(NewCollectedMetrics) > MaxUDPSize ->
             send(CollectedMetrics, State#state{collected_metrics = <<BinaryPacket/binary, "\n">>});
